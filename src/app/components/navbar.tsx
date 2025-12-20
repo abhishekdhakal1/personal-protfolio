@@ -59,7 +59,10 @@ export function Navbar() {
                 {item.name}
               </motion.a>
             ))}
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
+              onClick={() => alert("Resume not available currently")}
+            >
               Resume
             </Button>
           </div>
@@ -94,7 +97,10 @@ export function Navbar() {
                   {item.name}
                 </a>
               ))}
-              <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white w-full">
+              <Button
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white w-full"
+                onClick={() => alert("Resume not available currently")}
+              >
                 Resume
               </Button>
             </div>
