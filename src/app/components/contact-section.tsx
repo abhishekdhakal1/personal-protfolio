@@ -111,7 +111,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <div className="text-slate-400 text-sm mb-1">Location</div>
-                  <div className="text-white">Nepal</div>
+                  <div className="text-white">Kathmandu, Nepal</div>
                 </div>
               </div>
 

@@ -102,12 +102,12 @@ export function HeroSection() {
             transition={{ delay: 0.6 }}
           >
             {[
+              "Web Development",
               "VLSI Design",
               "Embedded AI",
               "IoT Networks",
               "5G/6G Systems",
               "FPGA Acceleration",
-              "Web Development",
             ].map((tech, index) => (
               <motion.div
                 key={tech}
