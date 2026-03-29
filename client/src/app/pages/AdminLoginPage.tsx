@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card } from "../components/ui/card";
 import { apiClient, endpoints } from "@/utils/api";
-import { Lock, LogIn } from "react-icons/md";
+import { Lock, LogIn } from "lucide-react";
 
 export function AdminLoginPage() {
   const navigate = useNavigate();

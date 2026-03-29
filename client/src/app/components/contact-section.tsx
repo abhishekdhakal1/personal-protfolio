@@ -1,15 +1,15 @@
 import { motion } from "framer-motion";
 import {
   Mail,
-  Github,
-  Linkedin,
-  Twitter,
   Send,
   MapPin,
   Phone,
   MessageCircle,
   Sparkles,
-} from "react-icons/md";
+  Github,
+  Linkedin,
+  Twitter,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
