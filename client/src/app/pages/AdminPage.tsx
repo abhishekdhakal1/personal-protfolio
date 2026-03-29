@@ -5,14 +5,14 @@ import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { apiClient, endpoints } from "@/utils/api";
 import {
-  LogOut,
-  Mail,
-  Phone,
-  Search,
-  Search as SearchIcon,
-  Trash2,
-  CheckCircle,
-  AlertCircle,
+  MdLogout as LogOut,
+  MdMail as Mail,
+  MdPhone as Phone,
+  MdSearch as Search,
+  MdSearch as SearchIcon,
+  MdDelete as Trash2,
+  MdCheckCircle as CheckCircle,
+  MdError as AlertCircle,
 } from "react-icons/md";
 
 interface Message {
