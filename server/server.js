@@ -4,7 +4,11 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const path = require("path");
-require("dotenv").config();
+
+// Load env vars early
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
 const authRoutes = require("./routes/auth");
 const profileRoutes = require("./routes/profile");
@@ -15,6 +19,7 @@ const experienceRoutes = require("./routes/experience");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV || "development";
 
 // ── Security ─────────────────────────────────────────────
 app.use(helmet());
@@ -55,10 +60,15 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
+mongoose.set("strictQuery", true);
 mongoose
-  .connect(MONGO_URI)
+  .connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: NODE_ENV === "production" ? 10 : 5,
+  })
   .then(() => {
-    console.log("✅ MongoDB connected");
+    console.log(`✅ MongoDB connected (${NODE_ENV} mode)`);
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
@@ -83,7 +93,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     error: "Internal server error",
-    ...(process.env.NODE_ENV !== "production" && { detail: err.message }),
+    ...(NODE_ENV !== "production" && { detail: err.message }),
   });
 });
 
@@ -92,9 +102,32 @@ app.use("*", (_req, res) => {
   res.status(404).json({ error: "Not found" });
 });
 
+// ── Graceful shutdown ────────────────────────────────────
+let server;
+const shutdown = async () => {
+  console.log("\n🛑 Shutting down gracefully...");
+  if (server) {
+    server.close(async () => {
+      console.log("✅ Server stopped");
+      await mongoose.connection.close();
+      console.log("✅ MongoDB connection closed");
+      process.exit(0);
+    });
+    // Force shutdown after 10s
+    setTimeout(() => {
+      console.error("❌ Forced shutdown after timeout");
+      process.exit(1);
+    }, 10000);
+  }
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+
 // ── Start ─────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT} (${NODE_ENV} mode)`);
   console.log(`🔗 API: http://localhost:${PORT}/api`);
+  console.log(`💚 Health check: http://localhost:${PORT}/api/health`);
 });
 
