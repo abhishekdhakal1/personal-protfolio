@@ -1,62 +1,50 @@
 import axios from "axios";
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5000/api";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
+  withCredentials: false,
 });
 
-// Add token to requests
+// Attach token from localStorage
 apiClient.interceptors.request.use((config) => {
   const token =
-    localStorage.getItem("auth_token") || localStorage.getItem("admin_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    localStorage.getItem("admin_token") ?? localStorage.getItem("auth_token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Handle errors
+// Handle 401 — redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Check if it's admin or user
-      const isAdmin = localStorage.getItem("admin_token");
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("auth_user");
+      const isAdmin = window.location.pathname.startsWith("/admin");
       localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_user");
-
-      window.location.href = isAdmin ? "/admin-login" : "/login";
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+      window.location.href = isAdmin ? "/admin-login" : "/";
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export const endpoints = {
-  // Auth
   auth: {
     login: "/auth/login",
     adminLogin: "/auth/admin/login",
     logout: "/auth/logout",
-    register: "/auth/register",
     me: "/auth/me",
   },
-  // Messages
-  messages: {
-    list: "/messages",
-    create: "/messages",
-    get: (id: string) => `/messages/${id}`,
-    update: (id: string) => `/messages/${id}`,
-    delete: (id: string) => `/messages/${id}`,
-    markAsRead: (id: string) => `/messages/${id}/read`,
+  profile: {
+    get: "/profile",
+    update: "/profile",
+    deleteImage: "/profile/image",
   },
-  // Projects
   projects: {
     list: "/projects",
     create: "/projects",
@@ -64,7 +52,6 @@ export const endpoints = {
     update: (id: string) => `/projects/${id}`,
     delete: (id: string) => `/projects/${id}`,
   },
-  // Skills
   skills: {
     list: "/skills",
     create: "/skills",
@@ -72,9 +59,19 @@ export const endpoints = {
     update: (id: string) => `/skills/${id}`,
     delete: (id: string) => `/skills/${id}`,
   },
-  // Profile
-  profile: {
-    get: "/profile",
-    update: "/profile",
+  experience: {
+    list: "/experience",
+    create: "/experience",
+    get: (id: string) => `/experience/${id}`,
+    update: (id: string) => `/experience/${id}`,
+    delete: (id: string) => `/experience/${id}`,
+  },
+  messages: {
+    list: "/messages",
+    create: "/messages",
+    get: (id: string) => `/messages/${id}`,
+    update: (id: string) => `/messages/${id}`,
+    delete: (id: string) => `/messages/${id}`,
+    markAsRead: (id: string) => `/messages/${id}`,
   },
 };

@@ -1,31 +1,31 @@
-import { motion } from 'framer-motion';
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '../contexts/theme-context';
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "../contexts/theme-context";
+import { motion } from "framer-motion";
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <motion.button
+    <button
       onClick={toggleTheme}
-      className="relative w-12 h-12 rounded-full bg-slate-800 dark:bg-slate-700 border border-slate-600 dark:border-slate-500 flex items-center justify-center overflow-hidden group"
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      className="relative w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+      aria-label="Toggle theme"
     >
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity"
-      />
-      
-      <motion.div
-        key={theme}
-        initial={{ rotate: -180, opacity: 0 }}
-        animate={{ rotate: 0, opacity: 1 }}
-        exit={{ rotate: 180, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="text-cyan-400"
-      >
-        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-      </motion.div>
-    </motion.button>
+      <AnimatedIcon isDark={theme === "dark"} />
+    </button>
+  );
+}
+
+function AnimatedIcon({ isDark }: { isDark: boolean }) {
+  return (
+    <motion.div
+      key={isDark ? "moon" : "sun"}
+      initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+      exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+      transition={{ duration: 0.2 }}
+    >
+      {isDark ? <Moon size={18} /> : <Sun size={18} />}
+    </motion.div>
   );
 }

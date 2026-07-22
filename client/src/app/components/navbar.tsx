@@ -1,158 +1,175 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Terminal } from "lucide-react";
-import { Button } from "./ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, FileText } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
-const navItems = [
-  { name: "Home", href: "/" },
-  { name: "About", href: "/about" },
-  { name: "Projects", href: "/projects" },
-  { name: "Skills", href: "/skills" },
-  { name: "Contact", href: "/contact" },
+const NAV_LINKS = [
+  { label: "Home",       href: "#home" },
+  { label: "About",      href: "#about" },
+  { label: "Skills",     href: "#skills" },
+  { label: "Projects",   href: "#projects" },
+  { label: "Experience", href: "#experience" },
+  { label: "Contact",    href: "#contact" },
 ];
 
 export function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [active, setActive] = useState("home");
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleNavClick = () => {
-    setIsMobileMenuOpen(false);
-  };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      },
+      { threshold: 0.4, rootMargin: "-80px 0px -40% 0px" }
+    );
+    NAV_LINKS.forEach(({ href }) => {
+      const el = document.querySelector(href);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
-  const isActive = (href: string) => {
-    if (href === "/") {
-      return location.pathname === "/";
-    }
-    return location.pathname.startsWith(href);
+  const scrollTo = (href: string) => {
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+    setMobileOpen(false);
   };
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-lg"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <motion.div
-            className="flex items-center gap-2 group"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                <Terminal className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Abhishek
-              </span>
-            </Link>
-          </motion.div>
-
-          <div className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <motion.div
-                key={item.name}
-                whileHover={{ y: -2 }}
-              >
-                <Link
-                  to={item.href}
-                  className={`relative px-3 py-2 rounded-lg transition-all duration-300 font-medium ${
-                    isActive(item.href)
-                      ? "text-cyan-400 bg-cyan-400/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  }`}
-                  onClick={handleNavClick}
-                >
-                  {item.name}
-                  {isActive(item.href) && (
-                    <motion.div
-                      layoutId="activeSection"
-                      className="absolute inset-0 bg-cyan-400/10 rounded-lg -z-10"
-                    />
-                  )}
-                </Link>
-              </motion.div>
-            ))}
-            <ThemeToggle />
-            <Button
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/25"
-              onClick={() => alert("Resume not available currently")}
-            >
-              Resume
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-4 md:hidden">
-            <ThemeToggle />
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-[80] transition-all duration-300 ${
+          scrolled
+            ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-sm"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="container-custom">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
             <button
-              className="text-foreground"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => scrollTo("#home")}
+              className="flex items-center gap-2 group"
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+                <span className="text-sm font-bold text-primary-foreground">A</span>
+              </div>
+              <span className="font-semibold text-foreground hidden sm:block">Abhishek</span>
             </button>
+
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {NAV_LINKS.map(({ label, href }) => {
+                const id = href.replace("#", "");
+                const isActive = active === id;
+                return (
+                  <button
+                    key={href}
+                    onClick={() => scrollTo(href)}
+                    className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      isActive
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {label}
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-indicator"
+                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Right actions */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <a
+                href="/resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <FileText size={14} />
+                Resume
+              </a>
+              <button
+                className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
-        <AnimatePresence>
-          {isMobileMenuOpen && (
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden mt-4 pb-4 overflow-hidden"
+              className="fixed inset-0 z-[70] bg-foreground/20 backdrop-blur-sm md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.nav
+              className="fixed top-0 right-0 bottom-0 z-[75] w-72 bg-background border-l border-border md:hidden flex flex-col p-6 pt-20"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="flex flex-col gap-2">
-                {navItems.map((item) => (
-                  <motion.div
-                    key={item.name}
-                    whileHover={{ x: 4 }}
-                  >
-                    <Link
-                      to={item.href}
-                      className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium block ${
-                        isActive(item.href)
-                          ? "text-cyan-400 bg-cyan-400/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              <div className="flex flex-col gap-1">
+                {NAV_LINKS.map(({ label, href }) => {
+                  const id = href.replace("#", "");
+                  const isActive = active === id;
+                  return (
+                    <button
+                      key={href}
+                      onClick={() => scrollTo(href)}
+                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
+                        isActive
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
-                      onClick={handleNavClick}
                     >
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                ))}
-                <Button
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white w-full mt-4"
-                  onClick={() => alert("Resume not available currently")}
-                >
-                  Resume
-                </Button>
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.nav>
+              <div className="mt-auto pt-6 border-t border-border">
+                <a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  <FileText size={16} />
+                  Download Resume
+                </a>
+              </div>
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

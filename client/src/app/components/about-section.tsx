@@ -1,239 +1,171 @@
-import { motion } from 'framer-motion';
-import { Code, Zap, Brain, Cpu, User, Award, Target, Calendar } from 'lucide-react';
-import { AnimatedCounter } from './animated-counter';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { MapPin, Mail, Phone, GraduationCap, Calendar } from "lucide-react";
+import { apiClient } from "@/utils/api";
 
-const expertise = [
-  {
-    icon: Cpu,
-    title: "Hardware Design",
-    description: "VLSI, FPGA, and embedded systems architecture",
-    color: "from-cyan-500 to-blue-500",
-  },
-  {
-    icon: Brain,
-    title: "AI & ML",
-    description: "Embedded AI, neuromorphic computing, and quantum algorithms",
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    icon: Zap,
-    title: "Communication Systems",
-    description: "IoT networks, 5G/6G technologies, and wireless protocols",
-    color: "from-orange-500 to-red-500",
-  },
-  {
-    icon: Code,
-    title: "Software Development",
-    description: "Full-stack web development, UI/UX design, and frontend engineering",
-    color: "from-green-500 to-emerald-500",
-  },
-];
-
-const timeline = [
-  {
-    year: "2021",
-    title: "Started Engineering Journey",
-    desc: "Began BE in Electronics, Communication and Information Engineering at Thapathali Campus",
-    type: "education"
-  },
-  {
-    year: "2022",
-    title: "Web Development Foundation",
-    desc: "Mastered frontend technologies and started exploring full-stack development",
-    type: "skill"
-  },
-  {
-    year: "2023",
-    title: "Hardware-Software Integration",
-    desc: "Focused on embedded systems, VLSI design, and IoT applications",
-    type: "project"
-  },
-  {
-    year: "2024",
-    title: "Advanced AI & Communication",
-    desc: "Currently diving into embedded AI, 5G/6G systems, and FPGA acceleration",
-    type: "current"
-  }
-];
-
-const stats = [
-  { icon: Target, value: 25, suffix: "+", label: "Projects Completed" },
-  { icon: Award, value: 15, suffix: "+", label: "Technical Skills" },
-  { icon: User, value: 3, suffix: "+", label: "Years Experience" },
-  { icon: Calendar, value: 1000, suffix: "+", label: "Hours of Code" }
-];
-
-function TimelineItem({ item, index }: { item: typeof timeline[0]; index: number }) {
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'education': return 'from-blue-500 to-cyan-500';
-      case 'skill': return 'from-green-500 to-emerald-500';
-      case 'project': return 'from-purple-500 to-pink-500';
-      case 'current': return 'from-orange-500 to-red-500';
-      default: return 'from-gray-500 to-slate-500';
-    }
+interface Profile {
+  name: string;
+  bio: string;
+  location: string;
+  email: string;
+  phone: string;
+  title: string;
+  profileImage: string;
+  stats: {
+    projectsCompleted: number;
+    technicalSkills: number;
+    yearsExperience: number;
+    hoursOfCode: number;
   };
+}
 
+function StatCard({ value, label }: { value: string | number; label: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.2 }}
-      className={`flex items-center mb-12 ${
-        index % 2 === 0 ? "flex-row" : "flex-row-reverse"
-      }`}
-    >
-      <div
-        className={`w-5/12 ${
-          index % 2 === 0 ? "text-right pr-8" : "text-left pl-8"
-        }`}
-      >
-        <div className="bg-card border border-border rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10">
-          <div className={`inline-block px-3 py-1 bg-gradient-to-r ${getTypeColor(item.type)} text-white text-xs font-bold rounded-full mb-3`}>
-            {item.year}
-          </div>
-          <h4 className="font-bold text-foreground mb-2">{item.title}</h4>
-          <p className="text-muted-foreground text-sm">{item.desc}</p>
-        </div>
+    <div className="p-5 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors">
+      <div className="text-3xl font-bold text-foreground mb-1">{value}
+        <span className="text-primary">+</span>
       </div>
-
-      <div className="w-2/12 flex justify-center">
-        <motion.div
-          className="relative"
-          whileHover={{ scale: 1.2 }}
-        >
-          <div className={`w-4 h-4 bg-gradient-to-r ${getTypeColor(item.type)} rounded-full border-4 border-background z-10`}></div>
-          {item.type === 'current' && (
-            <motion.div
-              className="absolute inset-0 w-4 h-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
-              animate={{ scale: [1, 1.5, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          )}
-        </motion.div>
-      </div>
-
-      <div className="w-5/12"></div>
-    </motion.div>
+      <div className="text-sm text-muted-foreground font-medium">{label}</div>
+    </div>
   );
 }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
 export function AboutSection() {
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    apiClient.get("/profile").then((r) => setProfile(r.data.profile)).catch(() => {});
+  }, []);
+
+  const stats = profile?.stats ?? {
+    projectsCompleted: 25,
+    technicalSkills: 15,
+    yearsExperience: 3,
+    hoursOfCode: 1000,
+  };
+
   return (
-    <section id="about" className="py-20 px-6 bg-gradient-to-b from-background to-muted/20">
-      <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
+    <section id="about" className="section-padding bg-secondary/30">
+      <div className="container-custom">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-14"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-4">
             About Me
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+            Passion meets <span className="text-primary">purpose</span>
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 mx-auto mb-8"></div>
-          <p className="text-muted-foreground max-w-3xl mx-auto text-lg leading-relaxed">
-            I'm a passionate third-year engineering student at the intersection of hardware and software. 
-            My mission is to bridge the gap between physical and digital systems, creating innovative 
-            solutions that push the boundaries of what's possible in cyber-physical systems.
-          </p>
         </motion.div>
 
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
-        >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="text-center p-6 bg-card border border-border rounded-xl hover:border-cyan-500/50 transition-all duration-300"
-              >
-                <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 p-0.5">
-                  <div className="w-full h-full bg-background rounded-lg flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-cyan-400" />
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* Bio */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeUp}
+          >
+            <h3 className="text-xl font-semibold text-foreground mb-4">
+              {profile?.name ?? "Abhishek Dhakal"}
+            </h3>
+            <p className="text-sm font-medium text-primary mb-4">
+              {profile?.title ?? "Electronics, Communication & Information Engineering"}
+            </p>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              {profile?.bio ?? "Passionate about building high-quality software and embedded systems. I enjoy solving complex problems and creating elegant solutions at the intersection of hardware and software."}
+            </p>
+
+            {/* Contact details */}
+            <div className="space-y-3">
+              {profile?.email && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Mail size={16} className="text-primary shrink-0" />
+                  <a href={`mailto:${profile.email}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                    {profile.email}
+                  </a>
+                </div>
+              )}
+              {profile?.phone && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Phone size={16} className="text-primary shrink-0" />
+                  <span className="text-muted-foreground">{profile.phone}</span>
+                </div>
+              )}
+              {profile?.location && (
+                <div className="flex items-center gap-3 text-sm">
+                  <MapPin size={16} className="text-primary shrink-0" />
+                  <span className="text-muted-foreground">{profile.location}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Education placeholder */}
+            <div className="mt-8 p-5 rounded-2xl border border-border bg-card">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                  <GraduationCap size={18} className="text-accent-foreground" />
+                </div>
+                <div>
+                  <div className="font-semibold text-foreground text-sm">
+                    Tribhuvan University, IOE
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    B.E. Electronics, Communication & Information Engineering
+                  </div>
+                  <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                    <Calendar size={11} />
+                    2021 – 2025
                   </div>
                 </div>
-                <div className="text-2xl md:text-3xl mb-2">
-                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className="text-sm text-muted-foreground font-medium">
-                  {stat.label}
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+              </div>
+            </div>
+          </motion.div>
 
-        {/* Expertise Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {expertise.map((skill, index) => {
-            const Icon = skill.icon;
-            return (
-              <motion.div
-                key={skill.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="group"
-              >
-                <div className="relative p-8 bg-card border border-border rounded-2xl hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          {/* Stats */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={{ ...fadeUp, visible: { ...fadeUp.visible, transition: { duration: 0.5, delay: 0.15, ease: "easeOut" } } }}
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <StatCard value={stats.projectsCompleted} label="Projects Completed" />
+              <StatCard value={stats.technicalSkills} label="Technical Skills" />
+              <StatCard value={stats.yearsExperience} label="Years Experience" />
+              <StatCard value={`${stats.hoursOfCode}+`} label="Hours of Code" />
+            </div>
 
-                  <div
-                    className={`w-16 h-16 rounded-xl bg-gradient-to-br ${skill.color} p-0.5 mb-6`}
-                  >
-                    <div className="w-full h-full bg-background rounded-xl flex items-center justify-center">
-                      <Icon className="h-8 w-8 text-cyan-400" />
+            {/* What I do */}
+            <div className="mt-6 p-6 rounded-2xl border border-border bg-card">
+              <h4 className="font-semibold text-foreground mb-4">What I do</h4>
+              <div className="space-y-3">
+                {[
+                  { title: "Web Development", desc: "Full-stack web apps with React, Node.js, and MongoDB" },
+                  { title: "Embedded Systems", desc: "Microcontroller programming, RTOS, PCB design" },
+                  { title: "IoT Solutions", desc: "Connected devices with MQTT, REST APIs, cloud platforms" },
+                ].map((item) => (
+                  <div key={item.title} className="flex items-start gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{item.title}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{item.desc}</div>
                     </div>
                   </div>
-
-                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-cyan-400 transition-colors">
-                    {skill.title}
-                  </h3>
-
-                  <p className="text-muted-foreground">{skill.description}</p>
-                </div>
-              </motion.div>
-            );
-          })}
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
-
-        {/* Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="mt-20"
-        >
-          <h3 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-            My Journey
-          </h3>
-
-          <div className="relative max-w-4xl mx-auto">
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-cyan-500 via-purple-500 to-orange-500"></div>
-
-            {timeline.map((item, index) => (
-              <TimelineItem key={item.year} item={item} index={index} />
-            ))}
-          </div>
-        </motion.div>
       </div>
     </section>
   );

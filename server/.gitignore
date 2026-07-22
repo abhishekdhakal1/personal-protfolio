@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Uploaded files — keep folder but not contents
+uploads/*
+!uploads/.gitkeep
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
