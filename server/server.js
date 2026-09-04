@@ -23,8 +23,8 @@ app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-// Security headers
-app.use(helmet());
+// Security headers (allow uploaded images to be fetched cross-origin by the frontend)
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // CORS: allow CLIENT_URL in both modes, plus localhost in dev
 const allowedOrigins = process.env.CLIENT_URL
