@@ -56,7 +56,7 @@ function PortfolioLayout() {
     <>
       <AnimatePresence>{isLoading && <LoadingScreen />}</AnimatePresence>
       {!isLoading && (
-        <div className="min-h-screen text-foreground">
+        <div className="min-h-screen flex flex-col text-foreground">
           <AnimatedBackground />
           <ScrollToTop />
           <ScrollProgress />
@@ -64,7 +64,7 @@ function PortfolioLayout() {
           <Navbar />
           <SocialRail />
           <EmailRail />
-          <main>
+          <main className="flex-1">
             <AnimatedRoutes />
           </main>
           <Footer />

@@ -3,23 +3,20 @@ const Profile = require('../models/Profile');
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { cloudinary, publicIdFromUrl } = require('../config/cloudinary');
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = process.env.UPLOAD_PATH || './uploads';
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
+// Store profile photos on Cloudinary (persists across redeploys) and crop
+// every upload to a consistent square so it always "covers" its frame.
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'portfolio/profile',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [{ width: 800, height: 800, crop: 'fill', gravity: 'face' }],
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
-  }
 });
 
 const upload = multer({
@@ -77,9 +74,12 @@ router.put('/', auth, upload.single('profileImage'), async (req, res) => {
       try { updateData.stats = JSON.parse(updateData.stats); } catch { delete updateData.stats; }
     }
 
-    // Handle profile image upload
+    // Handle profile image upload — replace the previous Cloudinary asset, if any
     if (req.file) {
-      updateData.profileImage = `/uploads/${req.file.filename}`;
+      const existing = await Profile.findOne();
+      const oldPublicId = existing?.profileImage && publicIdFromUrl(existing.profileImage);
+      if (oldPublicId) cloudinary.uploader.destroy(oldPublicId).catch(() => {});
+      updateData.profileImage = req.file.path;
     }
 
     // Update profile
@@ -107,12 +107,8 @@ router.delete('/image', auth, async (req, res) => {
     const profile = await Profile.findOne();
     
     if (profile && profile.profileImage) {
-      const imagePath = path.join(__dirname, '..', profile.profileImage);
-      
-      // Delete file if it exists
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+      const publicId = publicIdFromUrl(profile.profileImage);
+      if (publicId) await cloudinary.uploader.destroy(publicId).catch(() => {});
       
       // Update profile to remove image reference
       profile.profileImage = "";
