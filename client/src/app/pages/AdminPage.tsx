@@ -659,7 +659,7 @@ function MessagesManager() {
   useEffect(() => { load(); }, [load]);
 
   const markRead = async (id: string) => {
-    await apiClient.put(`/messages/${id}`, { read: true }).catch(() => {});
+    await apiClient.patch(`/messages/${id}/read`).catch(() => {});
     load();
   };
 

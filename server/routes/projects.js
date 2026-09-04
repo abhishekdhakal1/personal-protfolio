@@ -7,6 +7,16 @@ const fs = require('fs');
 
 const router = express.Router();
 
+// Multipart fields arrive as strings — coerce tags/featured back to their real types
+function parseProjectBody(body) {
+  const data = { ...body };
+  if (typeof data.tags === 'string') {
+    try { data.tags = JSON.parse(data.tags); } catch { data.tags = data.tags.split(',').map((t) => t.trim()).filter(Boolean); }
+  }
+  if (typeof data.featured === 'string') data.featured = data.featured === 'true';
+  return data;
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -93,8 +103,8 @@ router.get('/:id', async (req, res) => {
 // POST create project (protected)
 router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
-    const projectData = JSON.parse(req.body.projectData);
-    
+    const projectData = parseProjectBody(req.body);
+
     // Handle image upload
     if (req.file) {
       projectData.imageUrl = `/uploads/projects/${req.file.filename}`;
@@ -117,8 +127,8 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 // PUT update project (protected)
 router.put('/:id', auth, upload.single('image'), async (req, res) => {
   try {
-    const projectData = JSON.parse(req.body.projectData);
-    
+    const projectData = parseProjectBody(req.body);
+
     // Handle image upload
     if (req.file) {
       projectData.imageUrl = `/uploads/projects/${req.file.filename}`;

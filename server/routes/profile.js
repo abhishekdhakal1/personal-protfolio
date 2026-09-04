@@ -68,7 +68,15 @@ router.get('/', async (req, res) => {
 router.put('/', auth, upload.single('profileImage'), async (req, res) => {
   try {
     const updateData = req.body;
-    
+
+    // Multipart fields arrive as strings — parse the nested JSON objects back
+    if (typeof updateData.socialLinks === 'string') {
+      try { updateData.socialLinks = JSON.parse(updateData.socialLinks); } catch { delete updateData.socialLinks; }
+    }
+    if (typeof updateData.stats === 'string') {
+      try { updateData.stats = JSON.parse(updateData.stats); } catch { delete updateData.stats; }
+    }
+
     // Handle profile image upload
     if (req.file) {
       updateData.profileImage = `/uploads/${req.file.filename}`;
