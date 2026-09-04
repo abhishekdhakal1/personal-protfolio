@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
 const NAV_LINKS = [
-  { label: "Home",       href: "#home" },
-  { label: "About",      href: "#about" },
-  { label: "Skills",     href: "#skills" },
-  { label: "Projects",   href: "#projects" },
-  { label: "Experience", href: "#experience" },
-  { label: "Contact",    href: "#contact" },
+  { label: "Home",       to: "/home" },
+  { label: "About",      to: "/about" },
+  { label: "Skills",     to: "/skills" },
+  { label: "Projects",   to: "/projects" },
+  { label: "Experience", to: "/experience" },
+  { label: "Contact",    to: "/contact" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [active, setActive] = useState("home");
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -24,26 +25,10 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        });
-      },
-      { threshold: 0.4, rootMargin: "-80px 0px -40% 0px" }
-    );
-    NAV_LINKS.forEach(({ href }) => {
-      const el = document.querySelector(href);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollTo = (href: string) => {
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
     setMobileOpen(false);
-  };
+  }, [pathname]);
+
+  const isActivePath = (to: string) => pathname === to || (to === "/home" && pathname === "/");
 
   return (
     <>
@@ -57,25 +42,21 @@ export function Navbar() {
         <div className="container-custom">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <button
-              onClick={() => scrollTo("#home")}
-              className="flex items-center gap-2 group"
-            >
+            <Link to="/home" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span className="text-sm font-bold text-primary-foreground">A</span>
+                <span className="text-sm font-bold text-primary-foreground font-heading">A</span>
               </div>
-              <span className="font-semibold text-foreground hidden sm:block">Abhishek</span>
-            </button>
+              <span className="font-heading font-semibold text-foreground hidden sm:block">Abhishek</span>
+            </Link>
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map(({ label, href }) => {
-                const id = href.replace("#", "");
-                const isActive = active === id;
+              {NAV_LINKS.map(({ label, to }) => {
+                const isActive = isActivePath(to);
                 return (
-                  <button
-                    key={href}
-                    onClick={() => scrollTo(href)}
+                  <Link
+                    key={to}
+                    to={to}
                     className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                       isActive
                         ? "text-primary"
@@ -89,7 +70,7 @@ export function Navbar() {
                         className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
                       />
                     )}
-                  </button>
+                  </Link>
                 );
               })}
             </nav>
@@ -101,7 +82,7 @@ export function Navbar() {
                 href="/resume.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold rounded-full border-2 border-primary text-primary hover:bg-primary/10 transition-colors"
               >
                 <FileText size={14} />
                 Resume
@@ -137,13 +118,12 @@ export function Navbar() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <div className="flex flex-col gap-1">
-                {NAV_LINKS.map(({ label, href }) => {
-                  const id = href.replace("#", "");
-                  const isActive = active === id;
+                {NAV_LINKS.map(({ label, to }) => {
+                  const isActive = isActivePath(to);
                   return (
-                    <button
-                      key={href}
-                      onClick={() => scrollTo(href)}
+                    <Link
+                      key={to}
+                      to={to}
                       className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
                         isActive
                           ? "bg-accent text-accent-foreground"
@@ -151,7 +131,7 @@ export function Navbar() {
                       }`}
                     >
                       {label}
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
@@ -173,3 +153,4 @@ export function Navbar() {
     </>
   );
 }
+

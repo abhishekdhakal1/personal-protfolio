@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, ExternalLink, Star, Search } from "lucide-react";
 import { apiClient } from "@/utils/api";
@@ -38,7 +39,7 @@ function ProjectCard({ project }: { project: Project }) {
       whileHover={{ y: -2 }}
     >
       {/* Image */}
-      <div className="relative h-44 bg-secondary overflow-hidden">
+      <Link to={`/projects/${project._id}`} className="relative h-44 bg-secondary overflow-hidden block">
         {imgSrc ? (
           <img src={imgSrc} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
@@ -55,12 +56,16 @@ function ProjectCard({ project }: { project: Project }) {
         <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[project.status] ?? ""}`}>
           {project.status}
         </div>
-      </div>
+      </Link>
 
       {/* Content */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-foreground leading-tight">{project.title}</h3>
+          <h3 className="font-semibold text-foreground leading-tight">
+            <Link to={`/projects/${project._id}`} className="hover:text-primary transition-colors">
+              {project.title}
+            </Link>
+          </h3>
           <span className="shrink-0 text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
             {project.category}
           </span>
@@ -79,7 +84,13 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
 
         {/* Links */}
-        <div className="flex items-center gap-2 pt-3 border-t border-border">
+        <div className="flex items-center gap-3 pt-3 border-t border-border">
+          <Link
+            to={`/projects/${project._id}`}
+            className="flex items-center gap-1.5 text-xs font-medium text-foreground hover:text-primary transition-colors"
+          >
+            Details
+          </Link>
           {project.githubUrl && (
             <a
               href={project.githubUrl}
@@ -137,21 +148,18 @@ export function ProjectsSection() {
       <div className="container-custom">
         {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="mb-12 max-w-xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-4">
-            Portfolio
+          <div className="section-heading">
+            <span className="section-number text-sm">03.</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Selected Projects
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Selected <span className="text-primary">projects</span>
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-            A curated selection of things I've built, shipped, and learned from
-          </p>
         </motion.div>
 
         {/* Search + Filter */}

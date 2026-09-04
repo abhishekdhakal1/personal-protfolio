@@ -45,21 +45,18 @@ export function ContactSection() {
       <div className="container-custom">
         {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="mb-12 max-w-xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-4">
-            Contact
+          <div className="section-heading">
+            <span className="section-number text-sm">05.</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Let's Work Together
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Let&apos;s work <span className="text-primary">together</span>
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-            Have a project in mind or just want to say hi? I&apos;d love to hear from you.
-          </p>
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 max-w-5xl mx-auto">
@@ -154,7 +151,7 @@ export function ContactSection() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {status === "loading" ? (
                     <div className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />

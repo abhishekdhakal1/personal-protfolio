@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Github, Linkedin, Twitter, Mail, Heart } from "lucide-react";
 
 const SOCIAL_LINKS = [
@@ -8,12 +9,12 @@ const SOCIAL_LINKS = [
 ];
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Skills", href: "#skills" },
-  { label: "Projects", href: "#projects" },
-  { label: "Experience", href: "#experience" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", to: "/home" },
+  { label: "About", to: "/about" },
+  { label: "Skills", to: "/skills" },
+  { label: "Projects", to: "/projects" },
+  { label: "Experience", to: "/experience" },
+  { label: "Contact", to: "/contact" },
 ];
 
 export function Footer() {
@@ -39,18 +40,14 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-foreground mb-3">Navigation</h4>
             <ul className="space-y-2">
-              {NAV_LINKS.map(({ label, href }) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
-                    }}
+              {NAV_LINKS.map(({ label, to }) => (
+                <li key={to}>
+                  <Link
+                    to={to}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

@@ -52,21 +52,18 @@ export function ExperienceSection() {
       <div className="container-custom">
         {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="mb-12 max-w-xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-4">
-            Work Experience
+          <div className="section-heading">
+            <span className="section-number text-sm">02.</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              My Journey
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            My <span className="text-primary">journey</span>
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-            Professional experiences and roles that shaped my expertise
-          </p>
         </motion.div>
 
         {loading ? (

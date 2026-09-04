@@ -59,21 +59,18 @@ export function SkillsSection() {
       <div className="container-custom">
         {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="mb-12 max-w-xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-4">
-            Technical Skills
+          <div className="section-heading">
+            <span className="section-number text-sm">04.</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              My Skill Set
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            My <span className="text-primary">skill set</span>
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-            Technologies and tools I've worked with across different domains
-          </p>
         </motion.div>
 
         {/* Category filters */}

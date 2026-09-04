@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Mail, Github, Linkedin, Twitter, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight, Mail, Github, Linkedin, Twitter, MapPin, Wifi } from "lucide-react";
 import { apiClient } from "@/utils/api";
 
 interface Profile {
@@ -63,6 +64,9 @@ const fadeUp = {
 
 export function HeroSection() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { scrollY } = useScroll();
+  const blobYSlow = useTransform(scrollY, [0, 600], [0, 120]);
+  const blobYFast = useTransform(scrollY, [0, 600], [0, -160]);
 
   useEffect(() => {
     apiClient.get("/profile").then((r) => setProfile(r.data.profile)).catch(() => {});
@@ -89,9 +93,9 @@ export function HeroSection() {
         }}
       />
 
-      {/* Accent blobs */}
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      {/* Accent blobs — drift at different speeds as you scroll */}
+      <motion.div style={{ y: blobYSlow }} className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <motion.div style={{ y: blobYFast }} className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container-custom relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -102,7 +106,7 @@ export function HeroSection() {
               variants={fadeUp}
               initial="hidden"
               animate="visible"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-6"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-6 font-mono"
             >
               <MapPin size={13} className="text-primary" />
               {location}
@@ -148,19 +152,19 @@ export function HeroSection() {
               animate="visible"
               className="flex flex-wrap gap-3 mb-8"
             >
-              <button
-                onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 Get in Touch
                 <ArrowRight size={16} />
-              </button>
-              <button
-                onClick={() => document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" })}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm font-medium hover:bg-secondary transition-all hover:scale-[1.02] active:scale-[0.98]"
+              </Link>
+              <Link
+                to="/projects"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 View Projects
-              </button>
+              </Link>
             </motion.div>
 
             <motion.div
@@ -222,7 +226,14 @@ export function HeroSection() {
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                  <span className="relative flex w-2.5 h-2.5 items-center justify-center">
+                    <motion.span
+                      className="absolute inset-0 rounded-full bg-success"
+                      animate={{ scale: [1, 2.4, 2.4], opacity: [0.6, 0, 0] }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+                    />
+                    <span className="relative w-2 h-2 rounded-full bg-success" />
+                  </span>
                   <span className="text-xs font-medium text-foreground">Available for work</span>
                 </div>
               </motion.div>
@@ -230,23 +241,29 @@ export function HeroSection() {
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator — a radiating signal, nod to the electronics side of things */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
         >
-          <span className="text-xs text-muted-foreground font-medium">Scroll to explore</span>
-          <motion.div
-            className="w-5 h-8 rounded-full border-2 border-border flex items-start justify-center pt-1.5"
-          >
-            <motion.div
-              className="w-1 h-2 rounded-full bg-muted-foreground"
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          <span className="text-xs text-muted-foreground font-medium font-mono">Scroll to explore</span>
+          <div className="relative w-9 h-9 flex items-center justify-center">
+            <motion.span
+              className="absolute inset-0 rounded-full border border-primary"
+              animate={{ scale: [1, 1.9], opacity: [0.6, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
             />
-          </motion.div>
+            <motion.span
+              className="absolute inset-0 rounded-full border border-primary"
+              animate={{ scale: [1, 1.9], opacity: [0.6, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay: 0.9 }}
+            />
+            <div className="relative w-8 h-8 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center text-primary">
+              <Wifi size={15} />
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

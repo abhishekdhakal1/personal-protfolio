@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Mail, Phone, GraduationCap, Calendar } from "lucide-react";
 import { apiClient } from "@/utils/api";
+import { AnimatedCounter } from "./animated-counter";
 
 interface Profile {
   name: string;
@@ -19,11 +20,11 @@ interface Profile {
   };
 }
 
-function StatCard({ value, label }: { value: string | number; label: string }) {
+function StatCard({ value, label }: { value: number; label: string }) {
   return (
     <div className="p-5 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors">
-      <div className="text-3xl font-bold text-foreground mb-1">{value}
-        <span className="text-primary">+</span>
+      <div className="text-3xl font-bold text-foreground mb-1">
+        <AnimatedCounter value={value} suffix="+" />
       </div>
       <div className="text-sm text-muted-foreground font-medium">{label}</div>
     </div>
@@ -53,18 +54,18 @@ export function AboutSection() {
     <section id="about" className="section-padding bg-secondary/30">
       <div className="container-custom">
         <motion.div
-          className="text-center mb-14"
+          className="mb-14 max-w-xl mx-auto"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card text-sm text-muted-foreground mb-4">
-            About Me
+          <div className="section-heading">
+            <span className="section-number text-sm">01.</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              About Me
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Passion meets <span className="text-primary">purpose</span>
-          </h2>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
@@ -142,7 +143,7 @@ export function AboutSection() {
               <StatCard value={stats.projectsCompleted} label="Projects Completed" />
               <StatCard value={stats.technicalSkills} label="Technical Skills" />
               <StatCard value={stats.yearsExperience} label="Years Experience" />
-              <StatCard value={`${stats.hoursOfCode}+`} label="Hours of Code" />
+              <StatCard value={stats.hoursOfCode} label="Hours of Code" />
             </div>
 
             {/* What I do */}
@@ -154,8 +155,7 @@ export function AboutSection() {
                   { title: "Embedded Systems", desc: "Microcontroller programming, RTOS, PCB design" },
                   { title: "IoT Solutions", desc: "Connected devices with MQTT, REST APIs, cloud platforms" },
                 ].map((item) => (
-                  <div key={item.title} className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                  <div key={item.title} className="arrow-bullet flex items-start">
                     <div>
                       <div className="text-sm font-medium text-foreground">{item.title}</div>
                       <div className="text-xs text-muted-foreground mt-0.5">{item.desc}</div>
