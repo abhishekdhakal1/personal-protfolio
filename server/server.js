@@ -16,13 +16,14 @@ const projectRoutes = require("./routes/projects");
 const skillRoutes = require("./routes/skills");
 const messageRoutes = require("./routes/messages");
 const experienceRoutes = require("./routes/experience");
+const connectDB = require("./config/db");
 
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-// ── Security ─────────────────────────────────────────────
+// Security headers
 app.use(helmet());
 
 // CORS: allow CLIENT_URL in both modes, plus localhost in dev
@@ -47,36 +48,16 @@ const limiter = rateLimit({
 });
 app.use("/api/", limiter);
 
-// ── Body parsing ─────────────────────────────────────────
+// Body parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ── Static: serve uploaded files ─────────────────────────
+// Serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ── MongoDB ──────────────────────────────────────────────
-const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) {
-  console.error("❌ MONGO_URI is not set. Please configure your .env file.");
-  process.exit(1);
-}
+connectDB(NODE_ENV);
 
-mongoose.set("strictQuery", true);
-mongoose
-  .connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    maxPoolSize: NODE_ENV === "production" ? 10 : 5,
-  })
-  .then(() => {
-    console.log(`✅ MongoDB connected (${NODE_ENV} mode)`);
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1);
-  });
-
-// ── API Routes ───────────────────────────────────────────
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/projects", projectRoutes);
@@ -84,12 +65,12 @@ app.use("/api/skills", skillRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/experience", experienceRoutes);
 
-// ── Health check ─────────────────────────────────────────
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// ── Error handling ───────────────────────────────────────
+// Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -98,25 +79,25 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── 404 ──────────────────────────────────────────────────
+// 404
 app.use("*", (_req, res) => {
   res.status(404).json({ error: "Not found" });
 });
 
-// ── Graceful shutdown ────────────────────────────────────
+// Graceful shutdown
 let server;
 const shutdown = async () => {
-  console.log("\n🛑 Shutting down gracefully...");
+  console.log("Shutting down...");
   if (server) {
     server.close(async () => {
-      console.log("✅ Server stopped");
+      console.log("Server stopped");
       await mongoose.connection.close();
-      console.log("✅ MongoDB connection closed");
+      console.log("MongoDB connection closed");
       process.exit(0);
     });
-    // Force shutdown after 10s
+    // Force exit if shutdown hangs
     setTimeout(() => {
-      console.error("❌ Forced shutdown after timeout");
+      console.error("Forced shutdown after timeout");
       process.exit(1);
     }, 10000);
   }
@@ -125,10 +106,8 @@ const shutdown = async () => {
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
-// ── Start ─────────────────────────────────────────────────
 server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT} (${NODE_ENV} mode)`);
-  console.log(`🔗 API: http://localhost:${PORT}/api`);
-  console.log(`💚 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`Server running on port ${PORT} (${NODE_ENV} mode)`);
+  console.log(`API: http://localhost:${PORT}/api`);
 });
 

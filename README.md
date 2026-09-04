@@ -25,10 +25,10 @@ personal-portfolio/
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/ # Navbar, Hero, About, Skills, Projects, Experience, Contact, Footer
-│   │   │   ├── contexts/   # ThemeContext, AuthContext
+│   │   │   ├── contexts/   # theme-context.tsx
 │   │   │   ├── pages/      # HomePage, AdminLoginPage, AdminPage
 │   │   │   └── App.tsx
-│   │   ├── styles/         # theme.css, index.css
+│   │   ├── styles/         # theme.css, index.css, tailwind.css, fonts.css
 │   │   ├── utils/
 │   │   │   └── api.ts      # Axios instance + endpoint map
 │   │   └── main.tsx
@@ -40,6 +40,8 @@ personal-portfolio/
 │   └── vite.config.ts
 │
 ├── server/                 # Express + MongoDB backend (deploy to Render / Railway)
+│   ├── config/
+│   │   └── db.js           # MongoDB connection setup
 │   ├── middleware/
 │   │   └── auth.js
 │   ├── models/
@@ -47,8 +49,7 @@ personal-portfolio/
 │   │   ├── Message.js
 │   │   ├── Profile.js
 │   │   ├── Project.js
-│   │   ├── Skill.js
-│   │   └── User.js
+│   │   └── Skill.js
 │   ├── routes/
 │   │   ├── auth.js
 │   │   ├── experience.js

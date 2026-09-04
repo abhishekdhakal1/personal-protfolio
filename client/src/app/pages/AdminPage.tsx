@@ -10,7 +10,7 @@ import {
 import { apiClient } from "@/utils/api";
 import { ThemeToggle } from "../components/theme-toggle";
 
-// ── Types ──────────────────────────────────────────────────
+// ── Types ──
 interface Project {
   _id: string; title: string; description: string; category: string;
   tags: string[]; githubUrl?: string; demoUrl?: string;
@@ -36,7 +36,7 @@ interface Profile {
   stats: { projectsCompleted: number; technicalSkills: number; yearsExperience: number; hoursOfCode: number };
 }
 
-// ── Helpers ────────────────────────────────────────────────
+// ── Helpers ──
 const API_BASE = (import.meta.env.API_URL?.replace("/api", "") ?? "http://localhost:5000");
 
 function isAdminAuthenticated() {
@@ -48,10 +48,10 @@ function isAdminAuthenticated() {
   } catch { return false; }
 }
 
-// ── Input component ─────────────────────────────────────────
+// ── Input component ──
 const inputClass = "w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-primary transition";
 
-// ── Sidebar nav items ────────────────────────────────────────
+// ── Sidebar nav items ──
 const NAV_ITEMS = [
   { id: "overview",    label: "Overview",    icon: LayoutDashboard },
   { id: "profile",     label: "Profile",     icon: User },
@@ -61,9 +61,7 @@ const NAV_ITEMS = [
   { id: "messages",    label: "Messages",    icon: MessageSquare },
 ];
 
-// ═══════════════════════════════════════════════════════════
-// OVERVIEW
-// ═══════════════════════════════════════════════════════════
+// Overview
 function Overview({ stats }: { stats: { projects: number; skills: number; messages: number; unread: number } }) {
   const cards = [
     { label: "Projects", value: stats.projects, icon: FolderKanban, color: "text-blue-500" },
@@ -89,22 +87,30 @@ function Overview({ stats }: { stats: { projects: number; skills: number; messag
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// PROFILE EDITOR
-// ═══════════════════════════════════════════════════════════
+// Profile editor
+const DEFAULT_PROFILE: Profile = {
+  name: "", bio: "", title: "", email: "", phone: "",
+  location: "", profileImage: "",
+  socialLinks: { github: "", linkedin: "", twitter: "" },
+  stats: { projectsCompleted: 0, technicalSkills: 0, yearsExperience: 0, hoursOfCode: 0 },
+};
+
 function ProfileEditor() {
-  const [profile, setProfile] = useState<Profile>({
-    name: "", bio: "", title: "", email: "", phone: "",
-    location: "", profileImage: "",
-    socialLinks: { github: "", linkedin: "", twitter: "" },
-    stats: { projectsCompleted: 0, technicalSkills: 0, yearsExperience: 0, hoursOfCode: 0 },
-  });
+  const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
-    apiClient.get("/profile").then((r) => setProfile(r.data.profile ?? profile)).catch(() => {});
+    apiClient.get("/profile").then((r) => {
+      const p = r.data.profile ?? {};
+      setProfile({
+        ...DEFAULT_PROFILE,
+        ...p,
+        socialLinks: { ...DEFAULT_PROFILE.socialLinks, ...p.socialLinks },
+        stats: { ...DEFAULT_PROFILE.stats, ...p.stats },
+      });
+    }).catch(() => {});
   }, []);
 
   const save = async () => {
@@ -117,7 +123,12 @@ function ProfileEditor() {
       });
       if (imageFile) fd.append("profileImage", imageFile);
       const res = await apiClient.put("/profile", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      setProfile(res.data.profile);
+      setProfile((prev) => ({
+        ...prev,
+        ...res.data.profile,
+        socialLinks: { ...DEFAULT_PROFILE.socialLinks, ...res.data.profile?.socialLinks },
+        stats: { ...DEFAULT_PROFILE.stats, ...res.data.profile?.stats },
+      }));
       setMsg({ type: "success", text: "Profile saved successfully!" });
     } catch { setMsg({ type: "error", text: "Failed to save profile." }); }
     finally { setSaving(false); }
@@ -244,9 +255,7 @@ function ProfileEditor() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// PROJECTS MANAGER
-// ═══════════════════════════════════════════════════════════
+// Projects manager
 const EMPTY_PROJECT: Omit<Project, "_id"> = {
   title: "", description: "", category: "Web", tags: [],
   githubUrl: "", demoUrl: "", featured: false, status: "Completed",
@@ -392,9 +401,7 @@ function ProjectsManager() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// SKILLS MANAGER
-// ═══════════════════════════════════════════════════════════
+// Skills manager
 const EMPTY_SKILL: Omit<Skill, "_id"> = {
   name: "", category: "Web Development", level: 80, icon: "Code", visible: true
 };
@@ -503,9 +510,7 @@ function SkillsManager() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// EXPERIENCE MANAGER
-// ═══════════════════════════════════════════════════════════
+// Experience manager
 const EMPTY_EXP: Omit<Experience, "_id"> = {
   role: "", company: "", location: "", type: "Full-time",
   startDate: "", current: false, description: "", skills: [],
@@ -633,9 +638,7 @@ function ExperienceManager() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// MESSAGES MANAGER
-// ═══════════════════════════════════════════════════════════
+// Messages manager
 function MessagesManager() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selected, setSelected] = useState<Message | null>(null);
@@ -759,9 +762,7 @@ function MessagesManager() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// MAIN ADMIN PAGE
-// ═══════════════════════════════════════════════════════════
+// Main admin page
 export function AdminPage() {
   const navigate = useNavigate();
   const [section, setSection] = useState("overview");
