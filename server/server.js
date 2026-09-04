@@ -18,6 +18,7 @@ const messageRoutes = require("./routes/messages");
 const experienceRoutes = require("./routes/experience");
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
