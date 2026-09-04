@@ -23,10 +23,16 @@ export function useScrollPageNavigation() {
     if (index === -1) return;
 
     // Land at the top of the new page and give it a beat before it can trigger another jump.
+    // Lenis is stopped too, otherwise leftover momentum from the gesture that triggered
+    // the navigation keeps scrolling the freshly-landed page down past its top.
     lockedRef.current = true;
-    getLenis()?.scrollTo(0, { immediate: true });
+    const lenis = getLenis();
+    lenis?.stop();
+    lenis?.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
     const unlockTimer = setTimeout(() => {
       lockedRef.current = false;
+      getLenis()?.start();
     }, UNLOCK_DELAY);
 
     function atBoundary() {
@@ -40,6 +46,8 @@ export function useScrollPageNavigation() {
       const next = index + delta;
       if (next < 0 || next >= ROUTE_ORDER.length) return;
       lockedRef.current = true;
+      // Freeze scrolling right away so momentum from this gesture can't leak into the next page.
+      getLenis()?.stop();
       navigate(ROUTE_ORDER[next]);
     }
 
