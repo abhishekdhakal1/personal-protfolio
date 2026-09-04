@@ -102,7 +102,7 @@ cp client/.env.example client/.env
 ```
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+API_URL=http://localhost:5000/api
 ```
 
 **Server** — copy and edit:
@@ -156,7 +156,7 @@ From the dashboard you can manage: **Profile · Projects · Skills · Experience
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_API_URL` | Backend API URL including `/api` |
+| `API_URL` | Backend API URL including `/api` |
 
 ### `server/.env`
 
@@ -178,7 +178,7 @@ From the dashboard you can manage: **Profile · Projects · Skills · Experience
 1. Import repository on [vercel.com](https://vercel.com)
 2. Set **Root Directory**: `client`
 3. Build Command: `npm run build` | Output Directory: `dist`
-4. Add `VITE_API_URL=https://your-backend.onrender.com/api`
+4. Add `API_URL=https://your-backend.onrender.com/api`
 5. Deploy — SPA routing handled automatically by `vercel.json`
 
 ### Backend — Render
@@ -189,7 +189,7 @@ From the dashboard you can manage: **Profile · Projects · Skills · Experience
 4. Add all variables from `server/.env.example`
 5. Set `CLIENT_URL` to your Vercel frontend URL
 
-> After both deployments, cross-update `VITE_API_URL` (Vercel) and `CLIENT_URL` (Render), then redeploy both.
+> After both deployments, cross-update `API_URL` (Vercel) and `CLIENT_URL` (Render), then redeploy both.
 
 ---
 

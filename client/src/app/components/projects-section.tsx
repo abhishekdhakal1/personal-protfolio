@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function ProjectCard({ project }: { project: Project }) {
-  const apiBase = import.meta.env.VITE_API_URL?.replace("/api", "") ?? "http://localhost:5000";
+  const apiBase = import.meta.env.API_URL?.replace("/api", "") ?? "http://localhost:5000";
   const imgSrc = project.imageUrl
     ? (project.imageUrl.startsWith("http") ? project.imageUrl : `${apiBase}${project.imageUrl}`)
     : null;

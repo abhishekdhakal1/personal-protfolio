@@ -204,7 +204,7 @@ export function HeroSection() {
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-3xl overflow-hidden bg-secondary border border-border">
                 {profileImage ? (
                   <img
-                    src={profileImage.startsWith("http") ? profileImage : `${import.meta.env.VITE_API_URL?.replace("/api", "") ?? "http://localhost:5000"}${profileImage}`}
+                    src={profileImage.startsWith("http") ? profileImage : `${import.meta.env.API_URL?.replace("/api", "") ?? "http://localhost:5000"}${profileImage}`}
                     alt={name}
                     className="w-full h-full object-cover"
                   />
