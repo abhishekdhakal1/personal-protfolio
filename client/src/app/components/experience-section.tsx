@@ -34,18 +34,18 @@ export function ExperienceSection() {
 
   // Placeholder if no data
   const displayItems: Experience[] = experiences.length > 0 ? experiences : [
-    {
-      _id: "1",
-      role: "Full Stack Developer Intern",
-      company: "Tech Company",
-      location: "Remote",
-      type: "Internship",
-      startDate: "2024-01-01",
-      endDate: undefined,
-      current: true,
-      description: "Built and maintained web applications using React, Node.js, and MongoDB. Collaborated with a cross-functional team to deliver features on time.",
-      skills: ["React", "Node.js", "MongoDB", "Express"],
-    },
+    // {
+    //   _id: "1",
+    //   role: "Full Stack Developer Intern",
+    //   company: "Tech Company",
+    //   location: "Remote",
+    //   type: "Internship",
+    //   startDate: "2024-01-01",
+    //   endDate: undefined,
+    //   current: true,
+    //   description: "Built and maintained web applications using React, Node.js, and MongoDB. Collaborated with a cross-functional team to deliver features on time.",
+    //   skills: ["React", "Node.js", "MongoDB", "Express"],
+    // },
   ];
 
   return (
