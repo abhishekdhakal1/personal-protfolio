@@ -3,8 +3,7 @@ const Project = require('../models/Project');
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const { cloudinary, publicIdFromUrl } = require('../config/cloudinary');
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -18,15 +17,19 @@ function parseProjectBody(body) {
   return data;
 }
 
-// Store project images on Cloudinary (persists across redeploys) and crop
-// every upload to a consistent 16:9 frame so it always "covers" its thumbnail/banner.
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'portfolio/projects',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    transformation: [{ width: 1200, height: 675, crop: 'fill', gravity: 'auto' }],
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = process.env.UPLOAD_PATH || './uploads/projects';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
   },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'project-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
 const upload = multer({
@@ -104,7 +107,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 
     // Handle image upload
     if (req.file) {
-      projectData.imageUrl = req.file.path;
+      projectData.imageUrl = `/uploads/projects/${req.file.filename}`;
     }
 
     const project = new Project(projectData);
@@ -126,12 +129,9 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
   try {
     const projectData = parseProjectBody(req.body);
 
-    // Handle image upload — replace the previous Cloudinary asset, if any
+    // Handle image upload
     if (req.file) {
-      const existing = await Project.findById(req.params.id);
-      const oldPublicId = existing?.imageUrl && publicIdFromUrl(existing.imageUrl);
-      if (oldPublicId) cloudinary.uploader.destroy(oldPublicId).catch(() => {});
-      projectData.imageUrl = req.file.path;
+      projectData.imageUrl = `/uploads/projects/${req.file.filename}`;
     }
 
     const project = await Project.findByIdAndUpdate(
@@ -166,8 +166,10 @@ router.delete('/:id', auth, async (req, res) => {
 
     // Delete associated image file
     if (project.imageUrl) {
-      const publicId = publicIdFromUrl(project.imageUrl);
-      if (publicId) await cloudinary.uploader.destroy(publicId).catch(() => {});
+      const imagePath = path.join(__dirname, '..', project.imageUrl);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
     }
 
     res.json({ 
