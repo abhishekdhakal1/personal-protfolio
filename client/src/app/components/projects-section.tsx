@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, ExternalLink, Star, Search } from "lucide-react";
 import { apiClient } from "@/utils/api";
+import { CardTilt } from "./animations/card-tilt";
+import { TextReveal } from "./animations/text-reveal";
 
 interface Project {
   _id: string;
@@ -23,7 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
   "Planning": "text-muted-foreground bg-secondary",
 };
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project, index }: { project: Project; index: number }) {
   const apiBase = import.meta.env.API_URL?.replace("/api", "") ?? "http://localhost:5000";
   const imgSrc = project.imageUrl
     ? (project.imageUrl.startsWith("http") ? project.imageUrl : `${apiBase}${project.imageUrl}`)
@@ -32,12 +34,11 @@ function ProjectCard({ project }: { project: Project }) {
   return (
     <motion.article
       layout
-      className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-300"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -2 }}
     >
+      <CardTilt className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary/30 hover:shadow-[0_0_30px_-12px_var(--primary)] transition-all duration-300">
       {/* Image */}
       <Link to={`/projects/${project._id}`} className="relative h-44 bg-secondary overflow-hidden block">
         {imgSrc ? (
@@ -47,12 +48,17 @@ function ProjectCard({ project }: { project: Project }) {
             <span className="text-4xl font-bold text-border">{project.title[0]}</span>
           </div>
         )}
-        {project.featured && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium backdrop-blur-sm">
-            <Star size={10} />
-            Featured
-          </div>
-        )}
+        <div className="absolute top-3 left-3 flex items-center gap-2">
+          <span className="level-number px-2 py-1 rounded-full bg-background/70 backdrop-blur-sm text-[10px] font-semibold text-muted-foreground">
+            N°{String(index + 1).padStart(2, "0")}
+          </span>
+          {project.featured && (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium backdrop-blur-sm">
+              <Star size={10} />
+              Featured
+            </span>
+          )}
+        </div>
         <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[project.status] ?? ""}`}>
           {project.status}
         </div>
@@ -115,7 +121,82 @@ function ProjectCard({ project }: { project: Project }) {
           )}
         </div>
       </div>
+      </CardTilt>
     </motion.article>
+  );
+}
+
+// Large "mission briefing" spotlight for the top featured project — game-inspired
+// but still professional: objective/stack/status pulled straight from real project data.
+function FeaturedMission({ project }: { project: Project }) {
+  const apiBase = import.meta.env.API_URL?.replace("/api", "") ?? "http://localhost:5000";
+  const imgSrc = project.imageUrl
+    ? (project.imageUrl.startsWith("http") ? project.imageUrl : `${apiBase}${project.imageUrl}`)
+    : null;
+
+  return (
+    <motion.div
+      className="relative mb-14 rounded-3xl border border-primary/30 bg-card overflow-hidden glass-panel"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <div className="grid lg:grid-cols-2">
+        <div className="relative h-64 lg:h-auto bg-secondary overflow-hidden">
+          {imgSrc ? (
+            <img src={imgSrc} alt={project.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-6xl font-bold text-border">{project.title[0]}</span>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent lg:bg-gradient-to-r" />
+        </div>
+        <div className="p-8 lg:p-10 flex flex-col justify-center">
+          <span className="level-number text-xs font-semibold text-primary tracking-widest mb-3">MISSION 01</span>
+          <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">{project.title}</h3>
+
+          <div className="space-y-3 mb-6">
+            <div>
+              <span className="level-number text-[11px] font-semibold text-muted-foreground tracking-wide">OBJECTIVE</span>
+              <p className="text-sm text-muted-foreground leading-relaxed mt-1">{project.description}</p>
+            </div>
+            <div>
+              <span className="level-number text-[11px] font-semibold text-muted-foreground tracking-wide">TECHNOLOGY</span>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {project.tags.map((tag) => (
+                  <span key={tag} className="text-xs px-2 py-0.5 rounded-lg bg-accent text-accent-foreground font-medium">{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className="level-number text-[11px] font-semibold text-muted-foreground tracking-wide">STATUS</span>
+              <p className={`inline-block ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[project.status] ?? ""}`}>{project.status}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to={`/projects/${project._id}`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all"
+            >
+              View Case Study
+            </Link>
+            {project.demoUrl && (
+              <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                Live Demo <ExternalLink size={14} />
+              </a>
+            )}
+            {project.githubUrl && (
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                <Github size={14} /> Code
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -133,6 +214,7 @@ export function ProjectsSection() {
   }, []);
 
   const categories = ["All", ...Array.from(new Set(projects.map((p) => p.category)))];
+  const featuredProject = projects.find((p) => p.featured);
   const filtered = projects
     .filter((p) => activeCategory === "All" || p.category === activeCategory)
     .filter((p) =>
@@ -156,11 +238,11 @@ export function ProjectsSection() {
         >
           <div className="section-heading">
             <span className="section-number text-sm">03.</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Selected Projects
-            </h2>
+            <TextReveal as="h2" text="Selected Work" className="text-2xl sm:text-3xl font-bold text-foreground" />
           </div>
         </motion.div>
+
+        {!loading && featuredProject && <FeaturedMission project={featuredProject} />}
 
         {/* Search + Filter */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -205,8 +287,8 @@ export function ProjectsSection() {
         ) : (
           <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
-              {filtered.map((project) => (
-                <ProjectCard key={project._id} project={project} />
+              {filtered.map((project, i) => (
+                <ProjectCard key={project._id} project={project} index={i} />
               ))}
             </AnimatePresence>
           </motion.div>

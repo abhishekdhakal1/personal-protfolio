@@ -5,12 +5,12 @@ import { Menu, X, FileText } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
 const NAV_LINKS = [
-  { label: "Home",       to: "/home" },
-  { label: "About",      to: "/about" },
-  { label: "Skills",     to: "/skills" },
-  { label: "Projects",   to: "/projects" },
-  { label: "Experience", to: "/experience" },
-  { label: "Contact",    to: "/contact" },
+  { label: "Home",       to: "/home",       num: "01" },
+  { label: "About",      to: "/about",      num: "02" },
+  { label: "Skills",     to: "/skills",     num: "03" },
+  { label: "Projects",   to: "/projects",   num: "04" },
+  { label: "Experience", to: "/experience", num: "05" },
+  { label: "Contact",    to: "/contact",    num: "06" },
 ];
 
 export function Navbar() {
@@ -34,9 +34,7 @@ export function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-[80] transition-all duration-300 ${
-          scrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-sm"
-            : "bg-transparent"
+          scrolled ? "glass-panel shadow-sm border-x-0 border-t-0" : "bg-transparent"
         }`}
       >
         <div className="container-custom">
@@ -51,23 +49,24 @@ export function Navbar() {
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map(({ label, to }) => {
+              {NAV_LINKS.map(({ label, to, num }) => {
                 const isActive = isActivePath(to);
                 return (
                   <Link
                     key={to}
                     to={to}
-                    className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    className={`relative px-3 py-2 text-xs font-semibold tracking-wide rounded-lg transition-colors font-mono ${
                       isActive
                         ? "text-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                     }`}
                   >
-                    {label}
+                    <span className={`level-number mr-1.5 ${isActive ? "text-primary" : "text-muted-foreground/60"}`}>{num}</span>
+                    {label.toUpperCase()}
                     {isActive && (
                       <motion.div
                         layoutId="nav-indicator"
-                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
+                        className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]"
                       />
                     )}
                   </Link>
@@ -118,19 +117,20 @@ export function Navbar() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <div className="flex flex-col gap-1">
-                {NAV_LINKS.map(({ label, to }) => {
+                {NAV_LINKS.map(({ label, to, num }) => {
                   const isActive = isActivePath(to);
                   return (
                     <Link
                       key={to}
                       to={to}
-                      className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left ${
+                      className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left font-mono ${
                         isActive
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
-                      {label}
+                      <span className="level-number text-xs opacity-60">{num}</span>
+                      {label.toUpperCase()}
                     </Link>
                   );
                 })}

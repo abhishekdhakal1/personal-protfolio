@@ -1,14 +1,25 @@
 import { motion, animate } from "framer-motion";
 import { useEffect, useState } from "react";
 
+const STEPS = [
+  "01 / BOOTING RENDERER",
+  "02 / LOADING PROFILE",
+  "03 / INITIALIZING EXPERIENCE",
+];
+
 export function LoadingScreen() {
   const [percent, setPercent] = useState(0);
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
     const controls = animate(0, 100, {
       duration: 1.6,
       ease: "easeInOut",
-      onUpdate: (value) => setPercent(Math.round(value)),
+      onUpdate: (value) => {
+        const p = Math.round(value);
+        setPercent(p);
+        setStep(Math.min(STEPS.length - 1, Math.floor((p / 100) * STEPS.length)));
+      },
     });
     return () => controls.stop();
   }, []);
@@ -83,8 +94,16 @@ export function LoadingScreen() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35 }}
       >
-        <span>Loading portfolio</span>
-        <span className="text-primary font-semibold tabular-nums w-10">{percent}%</span>
+        <span className="text-primary font-semibold tabular-nums w-12">{percent}%</span>
+        <motion.span
+          key={step}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="tracking-wide uppercase text-xs"
+        >
+          {STEPS[step]}
+        </motion.span>
       </motion.div>
     </motion.div>
   );

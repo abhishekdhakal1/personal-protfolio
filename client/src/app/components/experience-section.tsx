@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Calendar, MapPin } from "lucide-react";
 import { apiClient } from "@/utils/api";
+import { TextReveal } from "./animations/text-reveal";
 
 interface Experience {
   _id: string;
@@ -59,10 +60,8 @@ export function ExperienceSection() {
           transition={{ duration: 0.5 }}
         >
           <div className="section-heading">
-            <span className="section-number text-sm">02.</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              My Journey
-            </h2>
+            <span className="section-number text-sm">04.</span>
+            <TextReveal as="h2" text="The Journey" className="text-2xl sm:text-3xl font-bold text-foreground" />
           </div>
         </motion.div>
 
@@ -76,7 +75,7 @@ export function ExperienceSection() {
           <div className="max-w-2xl mx-auto">
             <div className="relative">
               {/* Timeline line */}
-              <div className="absolute left-6 top-0 bottom-0 w-px bg-border" />
+              <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-border to-transparent" />
 
               <div className="space-y-6">
                 {displayItems.map((exp, i) => (
@@ -89,11 +88,11 @@ export function ExperienceSection() {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                   >
                     {/* Timeline dot */}
-                    <div className="absolute left-0 top-5 w-12 h-12 rounded-xl bg-card border border-border flex items-center justify-center">
+                    <div className="absolute left-0 top-5 w-12 h-12 rounded-xl bg-card border border-primary/30 shadow-[0_0_18px_-6px_var(--primary)] flex items-center justify-center">
                       <Briefcase size={18} className="text-primary" />
                     </div>
 
-                    <div className="p-5 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors">
+                    <div className="p-5 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-[0_0_24px_-10px_var(--primary)] transition-all">
                       <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                         <div>
                           <h3 className="font-semibold text-foreground">{exp.role}</h3>

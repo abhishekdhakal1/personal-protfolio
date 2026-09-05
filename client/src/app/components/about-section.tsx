@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MapPin, Mail, Phone, GraduationCap, Calendar } from "lucide-react";
 import { apiClient } from "@/utils/api";
 import { AnimatedCounter } from "./animated-counter";
+import { TextReveal } from "./animations/text-reveal";
 
 interface Profile {
   name: string;
@@ -62,10 +63,11 @@ export function AboutSection() {
         >
           <div className="section-heading">
             <span className="section-number text-sm">01.</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              About Me
-            </h2>
+            <TextReveal as="h2" text="About Me" className="text-2xl sm:text-3xl font-bold text-foreground" />
           </div>
+          <p className="mt-5 text-xl sm:text-2xl font-heading font-semibold text-foreground/90 leading-snug">
+            Building digital experiences with code, curiosity and creativity.
+          </p>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
