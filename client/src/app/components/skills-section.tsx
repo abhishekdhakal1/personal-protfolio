@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { apiClient } from "@/utils/api";
+import { CardTilt } from "./animations/card-tilt";
+import { TextReveal } from "./animations/text-reveal";
 
 interface Skill {
   _id: string;
@@ -66,10 +68,8 @@ export function SkillsSection() {
           transition={{ duration: 0.5 }}
         >
           <div className="section-heading">
-            <span className="section-number text-sm">04.</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              My Skill Set
-            </h2>
+            <span className="section-number text-sm">02.</span>
+            <TextReveal as="h2" text="Tech Ecosystem" className="text-2xl sm:text-3xl font-bold text-foreground" />
           </div>
         </motion.div>
 
@@ -101,20 +101,21 @@ export function SkillsSection() {
             {Object.entries(displayed).map(([category, skills]) => (
               <motion.div
                 key={category}
-                className="p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4 }}
               >
-                <h3 className="text-sm font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  {category}
-                </h3>
-                <div className="space-y-4">
-                  {skills.map((skill) => (
-                    <SkillBar key={skill._id} skill={skill} />
-                  ))}
-                </div>
+                <CardTilt className="group p-6 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-[0_0_30px_-10px_var(--primary)] transition-all duration-300">
+                  <h3 className="text-sm font-semibold text-foreground mb-4 pb-3 border-b border-border group-hover:border-primary/30 transition-colors">
+                    {category}
+                  </h3>
+                  <div className="space-y-4">
+                    {skills.map((skill) => (
+                      <SkillBar key={skill._id} skill={skill} />
+                    ))}
+                  </div>
+                </CardTilt>
               </motion.div>
             ))}
           </div>

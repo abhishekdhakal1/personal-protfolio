@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { apiClient } from "@/utils/api";
+import { TextReveal } from "./animations/text-reveal";
 
 interface FormData {
   name: string;
@@ -53,9 +54,7 @@ export function ContactSection() {
         >
           <div className="section-heading">
             <span className="section-number text-sm">05.</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Let's Work Together
-            </h2>
+            <TextReveal as="h2" text="Start a Conversation" className="text-2xl sm:text-3xl font-bold text-foreground" />
           </div>
         </motion.div>
 

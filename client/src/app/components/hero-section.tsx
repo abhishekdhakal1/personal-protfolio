@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Mail, Github, Linkedin, Twitter, MapPin, Wifi } from "lucide-react";
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import { ArrowRight, Github, Linkedin, Twitter, MapPin, Wifi } from "lucide-react";
 import { apiClient } from "@/utils/api";
 
 interface Profile {
@@ -17,33 +17,21 @@ interface Profile {
   };
 }
 
-const TITLES = [
-  "Full Stack Developer",
-  "Electronics Engineer",
-  "IoT Enthusiast",
-  "Open Source Contributor",
-];
-
-function TypingText({ texts }: { texts: string[] }) {
-  const [index, setIndex] = useState(0);
+// Types the backend-provided title once, then rests with a blinking cursor.
+function TypedTitle({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const current = texts[index % texts.length];
-    let timeout: ReturnType<typeof setTimeout>;
-    if (!isDeleting && displayed.length < current.length) {
-      timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), 80);
-    } else if (!isDeleting && displayed.length === current.length) {
-      timeout = setTimeout(() => setIsDeleting(true), 2000);
-    } else if (isDeleting && displayed.length > 0) {
-      timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 40);
-    } else {
-      setIsDeleting(false);
-      setIndex((i) => (i + 1) % texts.length);
-    }
-    return () => clearTimeout(timeout);
-  }, [displayed, isDeleting, index, texts]);
+    setDisplayed("");
+    if (!text) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      i += 1;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) clearInterval(interval);
+    }, 55);
+    return () => clearInterval(interval);
+  }, [text]);
 
   return (
     <span className="text-primary">
@@ -68,32 +56,48 @@ export function HeroSection() {
   const blobYSlow = useTransform(scrollY, [0, 600], [0, 120]);
   const blobYFast = useTransform(scrollY, [0, 600], [0, -160]);
 
+  // Subtle depth tilt on the profile photo, tracking the pointer within the hero.
+  const containerRef = useRef<HTMLElement>(null);
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const springX = useSpring(tiltX, { stiffness: 120, damping: 20 });
+  const springY = useSpring(tiltY, { stiffness: 120, damping: 20 });
+
   useEffect(() => {
     apiClient.get("/profile").then((r) => setProfile(r.data.profile)).catch(() => {});
   }, []);
 
+  function handlePointerMove(e: React.PointerEvent<HTMLElement>) {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const relX = (e.clientX - rect.left) / rect.width - 0.5;
+    const relY = (e.clientY - rect.top) / rect.height - 0.5;
+    tiltY.set(relX * 10);
+    tiltX.set(relY * -10);
+  }
+
+  function handlePointerLeave() {
+    tiltX.set(0);
+    tiltY.set(0);
+  }
+
   const name = profile?.name ?? "Abhishek Dhakal";
+  const title = profile?.title ?? "Full Stack Developer";
   const bio = profile?.bio ?? "Passionate developer building modern web applications and embedded systems at the intersection of software and hardware.";
   const location = profile?.location ?? "Kathmandu, Nepal";
   const social = profile?.socialLinks ?? {};
   const profileImage = profile?.profileImage;
+  const hasSocial = Boolean(social.github || social.linkedin || social.twitter);
 
   return (
     <section
       id="home"
+      ref={containerRef}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
       className="relative min-h-screen flex items-center section-padding overflow-hidden"
     >
-      {/* Subtle grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Accent blobs — drift at different speeds as you scroll */}
+      {/* Accent blobs — drift at different speeds as you scroll, hero's own atmosphere layer */}
       <motion.div style={{ y: blobYSlow }} className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <motion.div style={{ y: blobYFast }} className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -130,9 +134,9 @@ export function HeroSection() {
               variants={fadeUp}
               initial="hidden"
               animate="visible"
-              className="text-xl sm:text-2xl font-medium text-muted-foreground mb-6"
+              className="text-xl sm:text-2xl font-medium text-muted-foreground mb-6 font-mono min-h-[2rem]"
             >
-              <TypingText texts={TITLES} />
+              <TypedTitle text={title} />
             </motion.div>
 
             <motion.p
@@ -153,59 +157,56 @@ export function HeroSection() {
               className="flex flex-wrap gap-3 mb-8"
             >
               <Link
-                to="/contact"
+                to="/projects"
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                Get in Touch
+                Explore My Work
                 <ArrowRight size={16} />
               </Link>
               <Link
-                to="/projects"
+                to="/contact"
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border-2 border-primary text-primary text-sm font-semibold hover:bg-primary/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                View Projects
+                Contact Me
               </Link>
             </motion.div>
 
-            <motion.div
-              custom={5}
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              className="flex items-center gap-3"
-            >
-              {social.github && (
-                <SocialLink href={social.github} label="GitHub"><Github size={18} /></SocialLink>
-              )}
-              {social.linkedin && (
-                <SocialLink href={social.linkedin} label="LinkedIn"><Linkedin size={18} /></SocialLink>
-              )}
-              {social.twitter && (
-                <SocialLink href={social.twitter} label="Twitter"><Twitter size={18} /></SocialLink>
-              )}
-              {!social.github && !social.linkedin && !social.twitter && (
-                <>
-                  <SocialLink href="https://github.com" label="GitHub"><Github size={18} /></SocialLink>
-                  <SocialLink href="https://linkedin.com" label="LinkedIn"><Linkedin size={18} /></SocialLink>
-                  <SocialLink href="mailto:abhishekdhakal1826@gmail.com" label="Email"><Mail size={18} /></SocialLink>
-                </>
-              )}
-            </motion.div>
+            {hasSocial && (
+              <motion.div
+                custom={5}
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                className="flex items-center gap-3"
+              >
+                {social.github && (
+                  <SocialLink href={social.github} label="GitHub"><Github size={18} /></SocialLink>
+                )}
+                {social.linkedin && (
+                  <SocialLink href={social.linkedin} label="LinkedIn"><Linkedin size={18} /></SocialLink>
+                )}
+                {social.twitter && (
+                  <SocialLink href={social.twitter} label="Twitter"><Twitter size={18} /></SocialLink>
+                )}
+              </motion.div>
+            )}
           </div>
 
-          {/* Right — profile image */}
+          {/* Right — profile image, cinematic clip-path reveal + pointer-tracked depth tilt */}
           <motion.div
             className="flex justify-center lg:justify-end"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            style={{ perspective: 800 }}
+            initial={{ opacity: 0, clipPath: "inset(100% 0% 0% 0%)" }}
+            animate={{ opacity: 1, clipPath: "inset(0% 0% 0% 0%)" }}
+            transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="relative">
-              {/* Decorative ring */}
+            <motion.div className="relative" style={{ rotateX: springX, rotateY: springY }}>
+              {/* Decorative rings + soft glow */}
               <div className="absolute -inset-4 rounded-3xl border border-border opacity-50" />
               <div className="absolute -inset-8 rounded-3xl border border-border opacity-25" />
+              <div className="absolute -inset-6 rounded-3xl bg-primary/20 blur-2xl opacity-60" />
 
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-3xl overflow-hidden bg-secondary border border-border">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-3xl overflow-hidden bg-secondary border border-border shadow-[0_0_60px_-15px_var(--primary)]">
                 {profileImage ? (
                   <img
                     src={profileImage.startsWith("http") ? profileImage : `${import.meta.env.API_URL?.replace("/api", "") ?? "http://localhost:5000"}${profileImage}`}
@@ -237,7 +238,7 @@ export function HeroSection() {
                   <span className="text-xs font-medium text-foreground">Available for work</span>
                 </div>
               </motion.div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
 

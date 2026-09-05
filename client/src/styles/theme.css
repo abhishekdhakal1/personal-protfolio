@@ -246,4 +246,24 @@
     height: 6rem;
     background-color: var(--border);
   }
+
+  /* Film-grain texture overlay for the cinematic background system */
+  .noise-layer {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 160px 160px;
+  }
+
+  /* Frosted glass panel used by game-inspired UI chrome (nav, mission cards) */
+  .glass-panel {
+    background-color: color-mix(in srgb, var(--card) 70%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  /* Numbered "level" label, e.g. "01" preceding a nav item or section title */
+  .level-number {
+    font-family: 'Source Code Pro', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
 }
